@@ -104,10 +104,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     if (!isFirebaseConfigured || !auth) throw new Error("Google sign-in requires Firebase configuration. Use email/password in local mode.");
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      // Immediately ensure local profile is created — don't wait for onAuthStateChanged
+      if (result.user) {
+        const u = result.user;
+        ProfileService.ensureForAuth(u.uid, u.email ?? "", u.displayName ?? u.email?.split("@")[0] ?? "User", "google");
+        setFirebaseUser(u);
+        setUser(u);
+      }
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code ?? "";
-      if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user") {
+      if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
         // Fallback to redirect for blocked popups (common on GitHub Pages mobile)
         await signInWithRedirect(auth, googleProvider);
         return;

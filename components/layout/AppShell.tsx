@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/ui/logo";
+import { NotificationCenter } from "@/components/ui/notification-center";
 
 const DESKTOP_NAV = [
   { href: "/dashboard", label: "Overview", icon: "◈" },
@@ -100,6 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationCenter />
             <Button variant="primary" size="sm" onClick={() => setShowAdd(true)} aria-label="Add transaction">
               + Add
             </Button>
