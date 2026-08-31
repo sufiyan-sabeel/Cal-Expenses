@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface-canvas: #FAFAFA;
+  --surface-elevated-1: #FFFFFF;
+  --surface-elevated-2: #F2F2F3;
+  --surface-overlay: rgba(20,20,22,0.45);
+  --border-subtle: #E6E6E8;
+  --border-strong: #D0D0D3;
+  --text-primary: #16161A;
+  --text-secondary: #57575C;
+  --text-tertiary: #8A8A90;
+  --text-disabled: #B7B7BC;
+  --accent-primary: #2F6FED;
+  --accent-primary-subtle: #EAF1FE;
+  --semantic-income: #1F9D6B;
+  --semantic-expense: #E0563F;
+  --semantic-warning: #C98A1F;
+  --semantic-danger: #D6304A;
+  --semantic-neutral-info: #5B5F97;
+  --indicator-income: #1F9D6B;
+  --indicator-expense: #E0563F;
+  --indicator-bill: #C98A1F;
+  --indicator-event: #2F6FED;
+  --indicator-gift: #B15FCF;
+  --indicator-goal: #1D8FA6;
+  --indicator-reminder: #5B5F97;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-lexend: 'Lexend', 'Inter', system-ui, sans-serif;
+}
+
+.dark {
+  --surface-canvas: #0B0B0C;
+  --surface-elevated-1: #141416;
+  --surface-elevated-2: #1C1C1F;
+  --surface-overlay: rgba(0,0,0,0.6);
+  --border-subtle: #262629;
+  --border-strong: #34343A;
+  --text-primary: #F2F2F4;
+  --text-secondary: #A6A6AD;
+  --text-tertiary: #737379;
+  --text-disabled: #4A4A50;
+  --accent-primary: #5B8DFF;
+  --accent-primary-subtle: #16233F;
+  --semantic-income: #4BC58F;
+  --semantic-expense: #FF7A63;
+  --semantic-warning: #E3A83F;
+  --semantic-danger: #F2596F;
+  --semantic-neutral-info: #9297D6;
+  --indicator-gift: #D08CE8;
+  --indicator-goal: #4FC1D9;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--surface-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-weight: 600;
+}
+
+.display-number {
+  font-family: var(--font-lexend), Lexend, Inter, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-elevated-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-elevated-2) 25%, var(--surface-elevated-1) 37%, var(--surface-elevated-2) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.glass {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.dark .glass {
+  background: rgba(20,20,22,0.8);
+}
