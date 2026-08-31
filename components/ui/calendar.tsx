@@ -148,15 +148,6 @@ export function Calendar({ mode = "single", selected, onSelect, className, capti
   );
 }
 
-export function CalendarDemo() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
-  return (
-    <Calendar
-      mode="single"
-      selected={date}
-      onSelect={setDate}
-      className="rounded-lg border"
-      captionLayout="dropdown"
-    />
-  );
-}
+// CalendarDemo removed — Calendar is used directly via Stitch design system
+// Example usage (kept as comment for reference):
+// <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-lg border" captionLayout="dropdown" />

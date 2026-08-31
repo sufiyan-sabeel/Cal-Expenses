@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -36,7 +36,7 @@ export default function CalendarPage() {
   // For the requested shadcn-style picker demo — exact API the user asked for
   const selectedDateObj = React.useMemo(() => new Date(selected + "T00:00:00"), [selected]);
 
-  const data = useMemo(() => ({
+  const [data, setData] = useState(() => ({
     expenses: ExpenseService.getAll(),
     incomes: IncomeService.getAll(),
     recurring: RecurringService.getAll(),
@@ -45,7 +45,23 @@ export default function CalendarPage() {
     reminders: ReminderService.getAll(),
     goals: GoalService.getAll(),
     familyMembers: FamilyService.getAll(),
-  }), []);
+  }));
+  useEffect(() => {
+    const h = () => setData({
+      expenses: ExpenseService.getAll(),
+      incomes: IncomeService.getAll(),
+      recurring: RecurringService.getAll(),
+      events: EventService.getAll(),
+      gifts: GiftService.getAll(),
+      reminders: ReminderService.getAll(),
+      goals: GoalService.getAll(),
+      familyMembers: FamilyService.getAll(),
+    });
+    window.addEventListener("calexpenses:refresh", h as EventListener);
+    window.addEventListener("storage", h);
+    window.addEventListener("focus", h);
+    return () => { window.removeEventListener("calexpenses:refresh", h as EventListener); window.removeEventListener("storage", h); window.removeEventListener("focus", h); };
+  }, []);
 
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
@@ -73,35 +89,17 @@ export default function CalendarPage() {
     { type: "reminder", label: "Reminder", color: "var(--indicator-reminder)", icon: "🔔" },
   ];
 
+  // Stitch-precise date picker — dropdown caption as requested, no code block, just UI
   return (
     <div className="space-y-4">
-      {/* Requested exact API demo — shadcn-style dropdown calendar */}
-      <Card className="flex flex-col lg:flex-row gap-6 items-start">
-        <div>
-          <h2 className="text-sm font-semibold">Pick a date —{" "}
-            <span className="font-normal text-[var(--text-secondary)]">
-              <code className="text-xs bg-[var(--surface-elevated-2)] px-1.5 py-0.5 rounded">captionLayout=&quot;dropdown&quot;</code>
-            </span>
-          </h2>
-          <p className="text-xs text-[var(--text-tertiary)] mt-1">Exact code you asked for:</p>
-          <pre className="mt-2 text-xs bg-[#0B0B0C] text-gray-200 p-3 rounded-md overflow-auto">
-{`"use client"
-import * as React from "react"
-import { Calendar } from "@/components/ui/calendar"
-
-export function CalendarDemo() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
-  return (
-    <Calendar
-      mode="single"
-      selected={date}
-      onSelect={setDate}
-      className="rounded-lg border"
-      captionLayout="dropdown"
-    />
-  )
-}`}
-          </pre>
+      <Card className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+        <div className="flex-1">
+          <h2 className="text-sm font-semibold tracking-tight">Date picker — Stitch</h2>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">Dropdown month/year • Inter 15px • 10px radius • accent ring</p>
+          <div className="mt-3 flex items-center gap-2 text-xs">
+            <span className="px-2 py-1 rounded-full bg-[var(--accent-primary-subtle)] text-[var(--accent-primary)] font-medium">Today: {todayISODate()}</span>
+            <span className="px-2 py-1 rounded-full bg-[var(--surface-elevated-2)] text-[var(--text-secondary)]">Selected: <strong className="text-[var(--text-primary)]">{selected}</strong></span>
+          </div>
         </div>
         <div className="shrink-0">
           <Calendar
@@ -113,12 +111,9 @@ export function CalendarDemo() {
               setSelected(iso);
               setCursor(new Date(d.getFullYear(), d.getMonth(), 1));
             }}
-            className="rounded-lg border"
+            className="rounded-lg border shadow-sm"
             captionLayout="dropdown"
           />
-          <p className="text-xs text-[var(--text-tertiary)] mt-2 text-center">
-            Selected: <span className="font-medium text-[var(--text-primary)]">{selected}</span>
-          </p>
         </div>
       </Card>
 

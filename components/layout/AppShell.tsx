@@ -46,8 +46,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-[var(--surface-canvas)]">
-      {/* Desktop sidebar */}
-      <aside className={cn("hidden lg:flex flex-col w-[260px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-elevated-1)] sticky top-0 h-screen overflow-auto", sidebarOpen ? "flex fixed inset-0 z-40 lg:static" : "")}>
+      {/* Sidebar — desktop fixed, mobile slide-over */}
+      <aside className={cn("flex-col w-[260px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-elevated-1)] sticky top-0 h-screen overflow-auto", sidebarOpen ? "flex fixed inset-0 z-40 lg:flex lg:static" : "hidden lg:flex")}>
         <div className="h-[64px] flex items-center px-5 border-b border-[var(--border-subtle)] shrink-0">
           <Link href="/dashboard" aria-label="CAL-EXPENSES home" className="flex items-center">
             <Logo variant="mark" size="md" />
