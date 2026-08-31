@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { ExpenseService } from "@/lib/services/expense.service";
 import { IncomeService } from "@/lib/services/income.service";
 import { EventService } from "@/lib/services/event.service";
@@ -11,7 +12,7 @@ import { ReminderService } from "@/lib/services/reminder.service";
 import { GoalService } from "@/lib/services/goal.service";
 import { FamilyService } from "@/lib/services/family.service";
 import { getOccurrencesInRange, getDayDetail } from "@/lib/calendar/occurrence";
-import { todayISODate } from "@/lib/domain/common";
+import { todayISODate, toISODate } from "@/lib/domain/common";
 
 type View = "month" | "week" | "day" | "agenda";
 
@@ -32,6 +33,8 @@ export default function CalendarPage() {
   const [cursor, setCursor] = useState(() => new Date());
   const [selected, setSelected] = useState<string>(todayISODate());
   const [filter, setFilter] = useState<string>("all");
+  // For the requested shadcn-style picker demo — exact API the user asked for
+  const selectedDateObj = React.useMemo(() => new Date(selected + "T00:00:00"), [selected]);
 
   const data = useMemo(() => ({
     expenses: ExpenseService.getAll(),
@@ -72,8 +75,55 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
+      {/* Requested exact API demo — shadcn-style dropdown calendar */}
+      <Card className="flex flex-col lg:flex-row gap-6 items-start">
+        <div>
+          <h2 className="text-sm font-semibold">Pick a date —{" "}
+            <span className="font-normal text-[var(--text-secondary)]">
+              <code className="text-xs bg-[var(--surface-elevated-2)] px-1.5 py-0.5 rounded">captionLayout=&quot;dropdown&quot;</code>
+            </span>
+          </h2>
+          <p className="text-xs text-[var(--text-tertiary)] mt-1">Exact code you asked for:</p>
+          <pre className="mt-2 text-xs bg-[#0B0B0C] text-gray-200 p-3 rounded-md overflow-auto">
+{`"use client"
+import * as React from "react"
+import { Calendar } from "@/components/ui/calendar"
+
+export function CalendarDemo() {
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  return (
+    <Calendar
+      mode="single"
+      selected={date}
+      onSelect={setDate}
+      className="rounded-lg border"
+      captionLayout="dropdown"
+    />
+  )
+}`}
+          </pre>
+        </div>
+        <div className="shrink-0">
+          <Calendar
+            mode="single"
+            selected={selectedDateObj}
+            onSelect={(d) => {
+              if (!d) return;
+              const iso = toISODate(d);
+              setSelected(iso);
+              setCursor(new Date(d.getFullYear(), d.getMonth(), 1));
+            }}
+            className="rounded-lg border"
+            captionLayout="dropdown"
+          />
+          <p className="text-xs text-[var(--text-tertiary)] mt-2 text-center">
+            Selected: <span className="font-medium text-[var(--text-primary)]">{selected}</span>
+          </p>
+        </div>
+      </Card>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Calendar</h1>
+        <h1 className="text-xl font-semibold">Financial Calendar</h1>
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" onClick={() => { const d = new Date(); setCursor(d); setSelected(d.toISOString().slice(0, 10)); }}>Today</Button>
           <Button variant="secondary" size="sm" onClick={() => setCursor(new Date(year, month - 1, 1))}>‹</Button>
