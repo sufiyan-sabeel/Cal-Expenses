@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, isFirebaseConfigured } from "./firebase";
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut, sendPasswordResetEmail, type User } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, sendPasswordResetEmail, updateProfile, type User } from "firebase/auth";
 import { googleProvider } from "./firebase";
 import { ProfileService } from "@/lib/services/profile.service";
 
@@ -48,6 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (lu) ProfileService.ensureForAuth(lu.uid, lu.email, lu.displayName, "password");
       return;
     }
+    // Handle redirect result (if user used signInWithRedirect fallback)
+    getRedirectResult(auth).catch(() => {});
     const unsub = onAuthStateChanged(auth, (u) => {
       setFirebaseUser(u);
       setUser(u as User | null);
@@ -93,13 +95,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    // displayName not set via Firebase here; profile service will use email prefix
+    if (name && cred.user) {
+      try { await updateProfile(cred.user, { displayName: name }); } catch {}
+    }
     ProfileService.ensureForAuth(cred.user.uid, cred.user.email ?? email, name ?? cred.user.displayName ?? email.split("@")[0] ?? "User", "password");
   };
 
   const signInWithGoogle = async () => {
     if (!isFirebaseConfigured || !auth) throw new Error("Google sign-in requires Firebase configuration. Use email/password in local mode.");
-    await signInWithPopup(auth, googleProvider);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (e: unknown) {
+      const code = (e as { code?: string })?.code ?? "";
+      if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user") {
+        // Fallback to redirect for blocked popups (common on GitHub Pages mobile)
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+      throw e;
+    }
   };
 
   const logout = async () => {
