@@ -56,7 +56,7 @@ export function NotificationCenter() {
             <div className="max-h-[64vh] overflow-auto">
               {notes.length === 0 ? (
                 <div className="p-8 text-center">
-                  <div className="mx-auto h-10 w-10 rounded-full bg-[var(--surface-elevated-2)] grid place-items-center text-[var(--text-tertiary)]">🔔</div>
+                  <div className="mx-auto h-10 w-10 rounded-full bg-[var(--surface-elevated-2)] grid place-items-center text-[var(--text-tertiary)]"><Icon name="bell" size={20} /></div>
                   <p className="text-sm font-medium mt-3">All caught up</p>
                   <p className="text-xs text-[var(--text-tertiary)] mt-1">No upcoming bills, events or alerts. Add a bill, event or budget to see reminders here.</p>
                 </div>

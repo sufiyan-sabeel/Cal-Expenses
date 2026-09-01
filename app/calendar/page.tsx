@@ -13,6 +13,7 @@ import { GoalService } from "@/lib/services/goal.service";
 import { FamilyService } from "@/lib/services/family.service";
 import { getOccurrencesInRange, getDayDetail } from "@/lib/calendar/occurrence";
 import { todayISODate, toISODate } from "@/lib/domain/common";
+import { Icon } from "@/components/ui/icons";
 
 type View = "month" | "week" | "day" | "agenda";
 
@@ -228,8 +229,8 @@ export default function CalendarPage() {
         <div className="mt-4 space-y-2">
           {dayDetail.expenses.map((e) => <div key={e.id} className="flex justify-between text-sm py-1 border-b border-[var(--border-subtle)]"><span>{e.description ?? e.merchant ?? "Expense"}</span><span className="tabular-nums">₹{e.amount}</span></div>)}
           {dayDetail.incomes.map((i) => <div key={i.id} className="flex justify-between text-sm py-1 border-b border-[var(--border-subtle)]"><span>{i.description ?? "Income"}</span><span className="tabular-nums text-[var(--semantic-income)]">₹{i.amount}</span></div>)}
-          {dayDetail.events.map((e) => <div key={e.id} className="text-sm py-1">🎉 {e.title} ({e.startDate} → {e.endDate})</div>)}
-          {dayDetail.gifts.map((g) => <div key={g.id} className="text-sm py-1">🎁 Gift for {g.recipient} — {g.budget ? `budget ₹${g.budget}` : ""}</div>)}
+          {dayDetail.events.map((e) => <div key={e.id} className="text-sm py-1 flex items-center gap-1.5"><Icon name="events" size={14} /> {e.title} <span className="text-xs text-[var(--text-tertiary)]">({e.startDate} → {e.endDate})</span></div>)}
+          {dayDetail.gifts.map((g) => <div key={g.id} className="text-sm py-1 flex items-center gap-1.5"><Icon name="gifts" size={14} /> Gift for {g.recipient} {g.budget ? <span className="text-xs text-[var(--text-tertiary)]">· budget ₹{g.budget}</span> : null}</div>)}
           {dayDetail.expenses.length === 0 && dayDetail.incomes.length === 0 && dayDetail.events.length === 0 && dayDetail.gifts.length === 0 && <p className="text-sm text-[var(--text-tertiary)]">No transactions on this date.</p>}
         </div>
       </Card>

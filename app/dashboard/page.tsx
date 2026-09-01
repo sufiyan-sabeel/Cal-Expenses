@@ -13,6 +13,8 @@ import { calcCurrentBalance, calcMonthlyIncome, calcMonthlyExpenses, calcMonthly
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Icon } from "@/components/ui/icons";
+import { ShareButton } from "@/components/ui/share-button";
 import { todayISODate } from "@/lib/domain/common";
 import Link from "next/link";
 
@@ -75,9 +77,12 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <span className="text-sm text-[var(--text-tertiary)]">{new Date().toLocaleDateString(data.profile.locale, { weekday: "long", month: "long", day: "numeric" })}</span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2"><Icon name="dashboard" size={22} /> Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <ShareButton title="CAL-EXPENSES Dashboard" text={`Balance ${fmt(data.balance)} • Income ${fmt(data.monthlyIncome)} • Expenses ${fmt(data.monthlyExpenses)}`} />
+          <span className="hidden sm:inline text-sm text-[var(--text-tertiary)]">{new Date().toLocaleDateString(data.profile.locale, { weekday: "long", month: "long", day: "numeric" })}</span>
+        </div>
       </div>
 
       {!hasData && (
