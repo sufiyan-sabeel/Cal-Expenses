@@ -45,15 +45,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Not authed: show minimal shell without nav (page will handle redirect)
   if (!user) return <>{children}</>;
 
+  const isHome = pathname === "/dashboard";
+
   return (
-    <div className="min-h-screen flex bg-[var(--surface-canvas)]">
-      {/* Sidebar — desktop fixed, mobile slide-over */}
-      <aside className={cn("flex-col w-[260px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-elevated-1)] sticky top-0 h-screen overflow-auto", sidebarOpen ? "flex fixed inset-0 z-40 lg:flex lg:static" : "hidden lg:flex")}>
-        <div className="h-[64px] flex items-center px-5 border-b border-[var(--border-subtle)] shrink-0">
-          <Link href="/dashboard" aria-label="CAL-EXPENSES home" className="flex items-center">
+    <div className="min-h-screen flex bg-[var(--color-background)]">
+      {/* Sidebar — 240 expanded / 72 collapsed per §17; hidden <1024, rail 1024-1440, full 1440+ */}
+      <aside className={cn("flex-col shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 h-screen overflow-auto", sidebarOpen ? "flex fixed inset-0 z-40 lg:flex lg:static w-[280px] lg:w-[240px] xl:w-[240px]" : "hidden lg:flex w-[72px] xl:w-[240px]")}>
+        <div className="h-[64px] flex items-center px-3 xl:px-5 border-b border-[var(--color-border)] shrink-0">
+          <Link href="/dashboard" aria-label="CAL-EXPENSES home" className="flex items-center gap-2">
             <Logo variant="mark" size="md" />
+            <span className="hidden xl:inline font-semibold tracking-tight text-sm">CAL-EXPENSES</span>
           </Link>
-          <button className="lg:hidden ml-auto p-2 rounded-md hover:bg-[var(--surface-elevated-2)]" onClick={() => setSidebarOpen(false)} aria-label="Close menu">✕</button>
+          <button className="lg:hidden ml-auto p-2 rounded-md hover:bg-[var(--color-surface-hover)]" onClick={() => setSidebarOpen(false)} aria-label="Close menu">✕</button>
         </div>
         <nav className="flex-1 p-3 space-y-1" aria-label="Primary">
           {DESKTOP_NAV.map((item) => {
@@ -90,14 +93,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
-        <header className="h-[64px] flex items-center justify-between px-4 lg:px-6 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated-1)] sticky top-0 z-20">
+        {/* Top bar — translucent on Home per §16, opaque elsewhere */}
+        <header className={`h-[64px] flex items-center justify-between px-4 lg:px-6 border-b sticky top-0 z-20 ${isHome ? "bg-[var(--color-surface)]/80 backdrop-blur-[12px] border-[var(--color-border)]/60" : "bg-[var(--color-surface)] border-[var(--color-border)]"}`}>
           <div className="flex items-center gap-3">
-            <button className="lg:hidden p-2 rounded-md border border-[var(--border-subtle)] min-h-[44px] min-w-[44px] flex items-center justify-center" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle navigation">☰</button>
+            <button className="lg:hidden p-2 rounded-md border border-[var(--color-border)] min-h-[44px] min-w-[44px] flex items-center justify-center" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle navigation">☰</button>
             <Link href="/dashboard" className="lg:hidden" aria-label="Home">
               <Logo variant="mark" size="sm" />
             </Link>
-            <div className="hidden lg:block text-sm text-[var(--text-tertiary)]">
+            <div className="hidden lg:block text-sm text-[var(--color-text-muted)]">
               Your money. Your days. One calendar.
             </div>
           </div>
@@ -106,18 +109,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Button variant="primary" size="sm" onClick={() => setShowAdd(true)} aria-label="Add transaction">
               + Add
             </Button>
-            <Link href="/profile" className="h-9 w-9 rounded-full bg-[var(--surface-elevated-2)] flex items-center justify-center text-sm font-medium border border-[var(--border-subtle)]" aria-label="Profile">
+            <Link href="/profile" className="h-9 w-9 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center text-sm font-medium border border-[var(--color-border)]" aria-label="Profile">
               {(user as any)?.displayName?.[0] ?? (user as any)?.email?.[0] ?? "U"}
             </Link>
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 pb-20 lg:pb-6 max-w-[1440px] w-full mx-auto">
+        <main className="flex-1 p-4 lg:p-6 pb-20 lg:pb-6 max-w-[1280px] w-full mx-auto">
           {children}
         </main>
 
-        {/* Mobile bottom nav — 44px touch targets, glass, safe-area */}
-        <nav aria-label="Mobile primary" className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--surface-elevated-1)]/85 backdrop-blur-[16px] border-t border-[var(--border-subtle)] flex items-center justify-around h-[68px] px-1 z-20 pb-[env(safe-area-inset-bottom)]">
+        {/* Mobile bottom nav — 64px + safe-area §18.1, FAB 56px elevation-4 */}
+        <nav aria-label="Mobile primary" className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--color-surface)]/85 backdrop-blur-[16px] border-t border-[var(--color-border)] flex items-center justify-around h-[64px] px-1 z-20 pb-[env(safe-area-inset-bottom)]">
           {MOBILE_NAV.slice(0, 2).map((item) => {
             const active = pathname === item.href;
             return (
