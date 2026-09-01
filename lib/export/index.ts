@@ -61,6 +61,109 @@ export function downloadBlob(content: string | Blob, filename: string, mime: str
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+export function shareBlob(blob: Blob, filename: string, title: string): boolean {
+  const file = new File([blob], filename, { type: blob.type });
+  // @ts-ignore — Web Share API Level 2
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    // @ts-ignore
+    navigator.share({ files: [file], title, text: title }).catch(() => {});
+    return true;
+  }
+  if (navigator.share) {
+    // fallback text share
+    navigator.share({ title, text: `${title} — ${filename}` }).catch(() => {});
+    return true;
+  }
+  return false;
+}
+
+export function tryShareText(title: string, text: string, url?: string): boolean {
+  if (navigator.share) {
+    navigator.share({ title, text, url }).catch(() => {});
+    return true;
+  }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(`${title}\n${text}${url ? `\n${url}` : ""}`);
+    return true;
+  }
+  return false;
+}
+
+// PDF — client-side printable report (no server, no pdfmake dep). Generates HTML then prints/saves as PDF via browser.
+export function generateReportHtml(opts: { title: string; subtitle?: string; tableHtml: string; summaryHtml: string }): string {
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${opts.title}</title>
+<style>
+  @page { size: A4; margin: 16mm; }
+  * { font-family: Inter, system-ui, sans-serif; }
+  body { color: #16161A; background: #fff; line-height: 1.5; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: #57575C; font-size: 12px; margin-bottom: 16px; }
+  .summary { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 16px 0; }
+  .card { border: 1px solid #E6E6E8; border-radius: 10px; padding: 12px; background: #FAFAFA; }
+  .card b { display: block; font-size: 18px; }
+  .card span { font-size: 11px; color: #57575C; text-transform: uppercase; letter-spacing: .06em; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; background: #F2F2F3; padding: 8px; border-bottom: 2px solid #E6E6E8; }
+  td { padding: 7px 8px; border-bottom: 1px solid #E6E6E8; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .footer { margin-top: 18px; font-size: 10px; color: #8A8A90; text-align: center; }
+  @media print { .no-print { display: none; } }
+</style></head><body>
+  <h1>${opts.title}</h1>
+  ${opts.subtitle ? `<div class="sub">${opts.subtitle}</div>` : ""}
+  <div class="summary">${opts.summaryHtml}</div>
+  ${opts.tableHtml}
+  <div class="footer">CAL-EXPENSES — Your money. Your days. One calendar. • Generated ${new Date().toLocaleString()} • Local-only data</div>
+  <script>window.onload=()=>{ setTimeout(()=>window.print(), 300); }<\/script>
+</body></html>`;
+}
+
+export function printHtml(html: string): void {
+  const w = window.open("", "_blank");
+  if (!w) {
+    // fallback download
+    downloadBlob(html, "report.html", "text/html");
+    return;
+  }
+  w.document.write(html);
+  w.document.close();
+}
+
+export function buildAllExpensesReport(): { html: string; filename: string } {
+  const pkg = buildExportPackage();
+  const expenses = pkg.expenses.slice().sort((a, b) => a.date.localeCompare(b.date));
+  const total = expenses.reduce((s, e) => s + e.amount, 0);
+  const categories = pkg.categories;
+  const catMap = new Map(categories.map((c) => [c.id, c.name]));
+  const byCat = new Map<string, number>();
+  for (const e of expenses) byCat.set(e.categoryId, (byCat.get(e.categoryId) ?? 0) + e.amount);
+
+  const summaryHtml = `
+    <div class="card"><span>Total expenses</span><b>₹${total.toFixed(2)}</b><small>${expenses.length} records</small></div>
+    <div class="card"><span>Categories</span><b>${byCat.size}</b></div>
+    <div class="card"><span>Period</span><b>${expenses[0]?.date ?? "—"} → ${expenses[expenses.length - 1]?.date ?? "—"}</b></div>
+    <div class="card"><span>Currency</span><b>${pkg.profile?.currency ?? "INR"}</b></div>
+  `;
+
+  const rows = expenses.map((e, i) => `<tr><td>${i + 1}</td><td>${e.date}</td><td>${catMap.get(e.categoryId) ?? e.categoryId}</td><td>${(e.description ?? e.merchant ?? "").replace(/</g, "&lt;")}</td><td class="num">₹${e.amount.toFixed(2)}</td></tr>`).join("");
+  const catRows = Array.from(byCat.entries()).map(([id, amt]) => `<tr><td>${catMap.get(id) ?? id}</td><td class="num">₹${amt.toFixed(2)}</td><td class="num">${((amt / total) * 100).toFixed(1)}%</td></tr>`).join("");
+
+  const tableHtml = `
+    <h3 style="margin:16px 0 8px">Category breakdown</h3>
+    <table><thead><tr><th>Category</th><th class="num">Amount</th><th class="num">Share</th></tr></thead><tbody>${catRows || '<tr><td colspan="3">No data</td></tr>'}</tbody></table>
+    <h3 style="margin:18px 0 8px">All expenses (${expenses.length})</h3>
+    <table><thead><tr><th>#</th><th>Date</th><th>Category</th><th>Description</th><th class="num">Amount</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No expenses yet</td></tr>'}</tbody></table>
+  `;
+
+  const html = generateReportHtml({ title: "CAL-EXPENSES — All Expenses Report", subtitle: `Generated ${new Date().toLocaleDateString()} • ${expenses.length} expenses • Total ₹${total.toFixed(2)}`, summaryHtml, tableHtml });
+  return { html, filename: `cal-expenses-all-${new Date().toISOString().slice(0, 10)}.html` };
+}
+
+export function downloadPdfReport(): void {
+  const { html } = buildAllExpensesReport();
+  printHtml(html);
+}
+
 export function importMerge(pkg: ExportPackage): { added: Record<string, number>; conflicts: number } {
   // Merge: add new ids not present, skip conflicts
   const existingExpenses = loadListSync<Expense>(StorageKeys.expenses);

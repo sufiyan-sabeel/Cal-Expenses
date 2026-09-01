@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { NotificationService, type AppNotification } from "@/lib/services/notification.service";
 import { Button } from "./button";
+import { Icon } from "./icons";
 
 export function NotificationCenter() {
   const [open, setOpen] = useState(false);

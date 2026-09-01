@@ -5,9 +5,12 @@ import { Input, Select } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
-import { buildExportPackage, downloadBlob, validateImportPackage, importReplace } from "@/lib/export";
+import { buildExportPackage, downloadBlob, validateImportPackage, importReplace, downloadPdfReport } from "@/lib/export";
 import { StorageKeys } from "@/lib/storage/keys";
 import { getStorageSync } from "@/lib/storage/storage-provider";
+import { Icon } from "@/components/ui/icons";
+import { ShareButton } from "@/components/ui/share-button";
+import { playAlarm, requestNotificationPermission } from "@/lib/utils/alarm";
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -91,12 +94,13 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h3 className="font-medium">Privacy & Data</h3>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">All financial data is local-only (calexpenses:v1:* keys). AI disabled = no network calls.</p>
+        <h3 className="font-medium flex items-center gap-2"><Icon name="receipt" size={16} /> Privacy & Data — Export / Print</h3>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">All financial data is local-only (calexpenses:v1:* keys). AI disabled = no network calls. PDF is generated client-side and printed via browser (Save as PDF).</p>
         <div className="flex flex-wrap gap-2 mt-3">
-          <Button variant="secondary" onClick={exportJson}>Export JSON (full backup)</Button>
-          <Button variant="secondary" onClick={exportCsv}>Export CSV (expenses)</Button>
-          <Button variant="secondary" onClick={() => toast("PDF export generates client-side — use browser Print in Analytics for now", "info")}>Export PDF</Button>
+          <Button variant="secondary" onClick={exportJson}><Icon name="receipt" size={14} /> Export JSON</Button>
+          <Button variant="secondary" onClick={exportCsv}><Icon name="barChart" size={14} /> Export CSV</Button>
+          <Button variant="primary" onClick={() => { downloadPdfReport(); toast("Opening print preview — Save as PDF", "success"); }}><Icon name="receipt" size={14} /> Export PDF (All Expenses Chart)</Button>
+          <ShareButton title="CAL-EXPENSES Backup" text={`Backup ${new Date().toLocaleDateString()} — ${buildExportPackage().expenses.length} expenses`} />
         </div>
         <div className="mt-4 border-t pt-4">
           <h4 className="text-sm font-medium">Import backup</h4>
@@ -110,9 +114,18 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h3 className="font-medium">Notifications</h3>
-        <p className="text-sm text-[var(--text-secondary)]">Upcoming bills window: {settings.upcomingBillsWindowDays} days</p>
-        <Input label="Upcoming bills window (days)" type="number" value={String(settings.upcomingBillsWindowDays)} onChange={(e) => saveSettings({ upcomingBillsWindowDays: parseInt(e.target.value, 10) || 7 })} />
+        <h3 className="font-medium flex items-center gap-2"><Icon name="bell" size={16} /> Notifications & Alarms</h3>
+        <p className="text-sm text-[var(--text-secondary)]">Upcoming bills window: {settings.upcomingBillsWindowDays} days • Alarms use sound + system notification.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <Input label="Upcoming bills window (days)" type="number" value={String(settings.upcomingBillsWindowDays)} onChange={(e) => saveSettings({ upcomingBillsWindowDays: parseInt(e.target.value, 10) || 7 })} />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Test alarm</label>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={async () => { const ok = await requestNotificationPermission(); if (!ok) toast("Enable notifications in browser", "error"); else { playAlarm(1500); toast("Alarm played + notification", "success"); if (Notification.permission === "granted") new Notification("CAL-EXPENSES", { body: "Test alarm — bills & events reminder" }); } }}><Icon name="alarm" size={14} /> Test Alarm</Button>
+              <Button variant="ghost" onClick={() => playAlarm(800)}>Beep</Button>
+            </div>
+          </div>
+        </div>
       </Card>
     </div>
   );

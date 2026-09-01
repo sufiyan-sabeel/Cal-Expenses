@@ -90,13 +90,37 @@ export default function CalendarPage() {
   ];
 
   // Stitch-precise date picker — dropdown caption as requested, no code block, just UI
+  const spentToday = data.expenses.filter((e) => e.date === todayISODate()).reduce((s, e) => s + e.amount, 0);
+  const weekStart = (() => { const d = new Date(); const day = d.getDay(); const diff = -day; const s = new Date(d); s.setDate(d.getDate() + diff); return s.toISOString().slice(0, 10); })();
+  const spentWeek = data.expenses.filter((e) => e.date >= weekStart && e.date <= todayISODate()).reduce((s, e) => s + e.amount, 0);
+  const monthSpent = data.expenses.filter((e) => e.date >= monthStart && e.date <= monthEnd).reduce((s, e) => s + e.amount, 0);
+
   return (
     <div className="space-y-4">
+      {/* Current money spent — prominent */}
+      <div className="grid grid-cols-3 gap-2">
+        <Card className="p-3 text-center">
+          <div className="text-[10px] tracking-wide uppercase font-medium text-[var(--text-tertiary)]">Today</div>
+          <div className="text-lg font-bold tabular-nums text-[var(--semantic-expense)]">₹{spentToday.toFixed(0)}</div>
+          <div className="text-xs text-[var(--text-tertiary)]">{todayISODate()}</div>
+        </Card>
+        <Card className="p-3 text-center">
+          <div className="text-[10px] tracking-wide uppercase font-medium text-[var(--text-tertiary)]">This week</div>
+          <div className="text-lg font-bold tabular-nums">₹{spentWeek.toFixed(0)}</div>
+          <div className="text-xs text-[var(--text-tertiary)]">{weekStart} → {todayISODate()}</div>
+        </Card>
+        <Card className="p-3 text-center bg-[var(--accent-primary-subtle)] border-[var(--accent-primary)]/20">
+          <div className="text-[10px] tracking-wide uppercase font-medium text-[var(--text-tertiary)]">This month</div>
+          <div className="text-lg font-bold tabular-nums text-[var(--accent-primary)]">₹{monthSpent.toFixed(0)}</div>
+          <div className="text-xs text-[var(--text-tertiary)]">{monthStart.slice(0, 7)}</div>
+        </Card>
+      </div>
+
       <Card className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
         <div className="flex-1">
           <h2 className="text-sm font-semibold tracking-tight">Date picker — Stitch</h2>
           <p className="text-xs text-[var(--text-secondary)] mt-1">Dropdown month/year • Inter 15px • 10px radius • accent ring</p>
-          <div className="mt-3 flex items-center gap-2 text-xs">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="px-2 py-1 rounded-full bg-[var(--accent-primary-subtle)] text-[var(--accent-primary)] font-medium">Today: {todayISODate()}</span>
             <span className="px-2 py-1 rounded-full bg-[var(--surface-elevated-2)] text-[var(--text-secondary)]">Selected: <strong className="text-[var(--text-primary)]">{selected}</strong></span>
           </div>

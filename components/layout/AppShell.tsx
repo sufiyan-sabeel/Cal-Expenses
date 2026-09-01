@@ -7,28 +7,29 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/ui/logo";
 import { NotificationCenter } from "@/components/ui/notification-center";
+import { Icon } from "@/components/ui/icons";
 
-const DESKTOP_NAV = [
-  { href: "/dashboard", label: "Overview", icon: "◈" },
-  { href: "/calendar", label: "Calendar", icon: "📅" },
-  { href: "/expenses", label: "Expenses", icon: "💸" },
-  { href: "/income", label: "Income", icon: "💰" },
-  { href: "/budgets", label: "Budgets", icon: "📊" },
-  { href: "/goals", label: "Goals", icon: "🎯" },
-  { href: "/events", label: "Events", icon: "🎉" },
-  { href: "/gifts", label: "Gifts", icon: "🎁" },
-  { href: "/family", label: "Family", icon: "👨‍👩‍👧" },
-  { href: "/analytics", label: "Analytics", icon: "📈" },
-  { href: "/ai", label: "AI Assistant", icon: "✦" },
-  { href: "/automations", label: "Automations", icon: "⚙" },
-  { href: "/games", label: "Games", icon: "🎮" },
+const DESKTOP_NAV: { href: string; label: string; icon: "dashboard" | "calendar" | "expenses" | "income" | "budgets" | "goals" | "events" | "gifts" | "family" | "analytics" | "ai" | "automations" | "games" }[] = [
+  { href: "/dashboard", label: "Overview", icon: "dashboard" },
+  { href: "/calendar", label: "Calendar", icon: "calendar" },
+  { href: "/expenses", label: "Expenses", icon: "expenses" },
+  { href: "/income", label: "Income", icon: "income" },
+  { href: "/budgets", label: "Budgets", icon: "budgets" },
+  { href: "/goals", label: "Goals", icon: "goals" },
+  { href: "/events", label: "Events", icon: "events" },
+  { href: "/gifts", label: "Gifts", icon: "gifts" },
+  { href: "/family", label: "Family", icon: "family" },
+  { href: "/analytics", label: "Analytics", icon: "analytics" },
+  { href: "/ai", label: "AI Assistant", icon: "ai" },
+  { href: "/automations", label: "Automations", icon: "automations" },
+  { href: "/games", label: "Games", icon: "games" },
 ];
 
-const MOBILE_NAV = [
-  { href: "/dashboard", label: "Home", icon: "⌂" },
-  { href: "/calendar", label: "Calendar", icon: "📅" },
-  { href: "/ai", label: "AI", icon: "✦" },
-  { href: "/profile", label: "Profile", icon: "◉" },
+const MOBILE_NAV: { href: string; label: string; icon: "home" | "calendar" | "ai" | "profile" }[] = [
+  { href: "/dashboard", label: "Home", icon: "home" },
+  { href: "/calendar", label: "Calendar", icon: "calendar" },
+  { href: "/ai", label: "AI", icon: "ai" },
+  { href: "/profile", label: "Profile", icon: "profile" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -69,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     : "text-[var(--text-secondary)] hover:bg-[var(--surface-elevated-2)] hover:text-[var(--text-primary)]"
                 )}
               >
-                <span aria-hidden className="w-5 text-center">{item.icon}</span>
+                <span aria-hidden className="grid place-items-center h-5 w-5 shrink-0"><Icon name={item.icon} size={16} /></span>
                 {item.label}
               </Link>
             );
@@ -77,7 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="p-4 border-t border-[var(--border-subtle)] space-y-2">
           <Link href="/settings" className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-            <span aria-hidden>⚙</span> Settings
+            <span aria-hidden className="grid place-items-center"><Icon name="settings" size={16} /></span> Settings
           </Link>
           <Button variant="ghost" size="sm" onClick={() => logout().then(() => router.push("/auth"))} className="w-full justify-start px-0">
             Sign out
@@ -121,7 +122,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             const active = pathname === item.href;
             return (
               <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={cn("flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] px-3 py-1 rounded-md transition-colors", active ? "text-[var(--accent-primary)] bg-[var(--accent-primary-subtle)]" : "text-[var(--text-tertiary)]")}>
-                <span aria-hidden className="text-[18px] leading-none">{item.icon}</span>
+                <span aria-hidden className="grid place-items-center"><Icon name={item.icon} size={18} /></span>
                 <span className="text-[10px] font-medium leading-none tracking-wide">{item.label}</span>
               </Link>
             );
@@ -137,7 +138,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             const active = pathname === item.href;
             return (
               <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={cn("flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] px-3 py-1 rounded-md transition-colors", active ? "text-[var(--accent-primary)] bg-[var(--accent-primary-subtle)]" : "text-[var(--text-tertiary)]")}>
-                <span aria-hidden className="text-[18px] leading-none">{item.icon}</span>
+                <span aria-hidden className="grid place-items-center"><Icon name={item.icon} size={18} /></span>
                 <span className="text-[10px] font-medium leading-none tracking-wide">{item.label}</span>
               </Link>
             );
@@ -155,12 +156,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: "Expense", href: "/expenses?action=new", icon: "💸" },
-                  { label: "Income", href: "/income?action=new", icon: "💰" },
-                  { label: "Event", href: "/events?action=new", icon: "🎉" },
-                  { label: "Bill", href: "/recurring?action=new", icon: "🧾" },
-                  { label: "Gift", href: "/gifts?action=new", icon: "🎁" },
-                  { label: "Goal", href: "/goals?action=new", icon: "🎯" },
+                  { label: "Expense", href: "/expenses?action=new", icon: "expenses" as const },
+                  { label: "Income", href: "/income?action=new", icon: "income" as const },
+                  { label: "Event", href: "/events?action=new", icon: "events" as const },
+                  { label: "Bill", href: "/recurring?action=new", icon: "receipt" as const },
+                  { label: "Gift", href: "/gifts?action=new", icon: "gifts" as const },
+                  { label: "Goal", href: "/goals?action=new", icon: "goals" as const },
                 ].map((a) => (
                   <Link
                     key={a.label}
@@ -168,7 +169,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     onClick={() => setShowAdd(false)}
                     className="flex flex-col items-center gap-2 p-4 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--surface-elevated-2)] transition-colors"
                   >
-                    <span className="text-2xl" aria-hidden>{a.icon}</span>
+                    <span className="h-10 w-10 rounded-full bg-[var(--surface-elevated-2)] grid place-items-center text-[var(--text-primary)]"><Icon name={a.icon} size={20} /></span>
                     <span className="text-sm font-medium">{a.label}</span>
                   </Link>
                 ))}
